@@ -30,8 +30,13 @@ Resources:
             BatchSize: 1
 
 Outputs:
-  TelegramMessageQueueArn:
-    Description: Telegram message queue Arn
-    Value: !GetAtt TelegramMessageQueue.Arn
+  TelegramMessageQueueUrl:
+    Description: Telegram message queue Url
+    Value: !Ref TelegramMessageQueue
     Export:
-      Name: TelegramMessageQueueArn
+      Name: TelegramMessageQueueUrl
+  TelegramMessageQueueName:
+    Description: Telegram message queue name
+    Value: !GetAtt TelegramMessageQueue.QueueName
+    Export:
+      Name: TelegramMessageQueueName
