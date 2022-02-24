@@ -21,7 +21,7 @@ Resources:
         - x86_64
       Policies:
         - SSMParameterReadPolicy:
-            ParameterName: 'telegram-ids'
+            ParameterName: 'telegram-ids/*'
       Events:
         TelegramMessageReceivedSQSEvent:
           Type: SQS
