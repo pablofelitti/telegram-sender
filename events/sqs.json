@@ -1,0 +1,29 @@
+{
+  "Records": [
+    {
+      "messageId": "asdfasdfasdf123123123",
+      "receiptHandle": "MessageReceiptHandle",
+      "body": "Texto de la oferta de fravega!",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1523232000000",
+        "SenderId": "123456789012",
+        "ApproximateFirstReceiveTimestamp": "1523232000001"
+      },
+      "messageAttributes": {
+        "EnvironmentId": {
+          "dataType": "String",
+          "stringValue": "dev"
+        },
+        "Channel": {
+          "dataType": "String",
+          "stringValue": "ofertas"
+        }
+      },
+      "md5OfBody": "7b270e59b47ff90a553787216d55d91d",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:MyQueue",
+      "awsRegion": "us-east-1"
+    }
+  ]
+}

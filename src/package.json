@@ -1,0 +1,13 @@
+{
+  "name": "telegram_sender",
+  "version": "1.0.0",
+  "description": "Telegram message sender",
+  "main": "app.js",
+  "author": "SAM CLI",
+  "dependencies": {
+    "telebot": "^1.4.1"
+  },
+  "scripts": {
+    "local": "node -e 'require(\"./app\").lambdaHandler()'"
+  }
+}
