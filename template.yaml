@@ -28,3 +28,10 @@ Resources:
           Properties:
             Queue: !GetAtt TelegramMessageQueue.Arn
             BatchSize: 1
+
+Outputs:
+  TelegramMessageQueueArn:
+    Description: Telegram message queue Arn
+    Value: !GetAtt TelegramMessageQueue.Arn
+    Export:
+      Name: TelegramMessageQueueArn
