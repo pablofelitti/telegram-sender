@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "telegram-sender"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-fd3rtu1cq4jn"
+s3_prefix = "telegram-sender"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []

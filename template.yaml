@@ -26,5 +26,5 @@ Resources:
         TelegramMessageReceivedSQSEvent:
           Type: SQS
           Properties:
-            Queue: !Ref TelegramMessageQueue
+            Queue: !GetAtt TelegramMessageQueue.Arn
             BatchSize: 1
