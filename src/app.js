@@ -32,11 +32,11 @@ exports.lambdaHandler = async (event, context) => {
         const channel = record.messageAttributes["Channel"].stringValue;
 
         let parameters = await getParameters(environmentId)
-        console.log(parameters['dev/token'])
         const TELEGRAM_BOT_TOKEN = getParameter(parameters, environmentId, 'token')
         const TELEGRAM_CHANNEL = getParameter(parameters, environmentId, channel)
         const bot = new TeleBot(TELEGRAM_BOT_TOKEN)
         bot.start()
         await sendMessage(record.body, TELEGRAM_CHANNEL, bot)
+        bot.stop()
     }
 };
