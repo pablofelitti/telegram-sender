@@ -5,7 +5,7 @@
   "main": "app.js",
   "author": "SAM CLI",
   "dependencies": {
-    "telebot": "^1.4.1"
+    "axios": "^0.27.2"
   },
   "scripts": {
     "local": "node -e 'require(\"./app\").lambdaHandler()'"
