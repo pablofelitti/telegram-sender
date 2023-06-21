@@ -15,6 +15,8 @@ edition = "2021"
 # and it will keep the alphabetic ordering for you.
 
 [dependencies]
+aws-config = "0.55.3"
+aws-sdk-ssm = "0.28.0"
 aws_lambda_events = { version = "0.10.0", default-features = false, features = ["sqs"] }
 
 lambda_runtime = "0.8.1"
