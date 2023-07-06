@@ -11,14 +11,13 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     let shared_config = aws_config::from_env().region(region_provider).load().await;
     let client = Client::new(&shared_config);
 
-    let res = show_parameters(&client, &event.payload.records.get(0)).await;
-
-    println!("Parameters: {:?}", res);
+    let token = get_parameter(&client, &event.payload.records.get(0), "/telegram-ids/dev/token").await;
+    println!("Parameters: {:?}", token);
 
     Ok(())
 }
 
-async fn show_parameters(client: &Client, msg: &Option<&SqsMessage>) {
+async fn get_parameter(client: &Client, msg: &Option<&SqsMessage>, param_name: &str) -> Option<String> {
     match *msg {
         None => { panic!("No records found for event") }
         Some(r) => {
@@ -27,6 +26,15 @@ async fn show_parameters(client: &Client, msg: &Option<&SqsMessage>) {
                 Some(e) => {
                     let params = load_all_params(client, e.string_value.clone().unwrap().as_str()).await;
                     println!("{} params have been found", params.len());
+                    let opt = params.iter().find(|(x,_y)| x == param_name);
+                    return if opt.is_some() {
+                        println!("Found element");
+                        let (_x, y) = opt?;
+                        Some(y.to_string())
+                    } else {
+                        println!("Did not find any element");
+                        None
+                    }
                 }
             }
         }
