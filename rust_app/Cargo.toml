@@ -20,5 +20,7 @@ aws-sdk-ssm = "0.28.0"
 aws_lambda_events = { version = "0.10.0", default-features = false, features = ["sqs"] }
 
 lambda_runtime = "0.8.1"
+reqwest = { version = "0.11.18", features = ["json"]}
 tokio = { version = "1", features = ["macros"] }
+openssl = { version = "0.10.54", features = ["vendored"] }
 
