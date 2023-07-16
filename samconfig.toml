@@ -8,3 +8,7 @@ s3_prefix = "telegram-sender"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 image_repositories = []
+[default.build.parameters]
+beta_features = true
+[default.sync.parameters]
+beta_features = true

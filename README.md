@@ -2,11 +2,25 @@
 
 This projects sends a Telegram message to a given channel using a predefined bot token
 
-## Installation
+## To run locally using cargo lambda
 
-`sam build`
+```
+cd rust_app
+cargo lambda watch
+```
 
-`sam local invoke -e events/sqs.json`
+and in another terminal run:
+```
+cd rust_app
+cargo lambda invoke --data-file ../events/sqs.json
+```
+
+## To run locally using AWS SAM
+
+```
+sam build
+sam local invoke -e events/sqs.json
+```
 
 ## Deployment
 

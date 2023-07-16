@@ -5,6 +5,7 @@ Description: Telegram sender
 Globals:
   Function:
     Timeout: 5
+    MemorySize: 512
 
 Resources:
   TelegramMessageQueue:
@@ -13,10 +14,12 @@ Resources:
       VisibilityTimeout: 10
   TelegramMessageFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: rust-cargolambda
     Properties:
-      CodeUri: src/
-      Handler: app.lambdaHandler
-      Runtime: nodejs14.x
+      CodeUri: ./rust_app
+      Handler: bootstrap
+      Runtime: provided.al2
       Architectures:
         - x86_64
       Policies:
