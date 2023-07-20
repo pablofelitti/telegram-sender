@@ -10,40 +10,32 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     let shared_config = aws_config::from_env().region(region_provider).load().await;
     let client = Client::new(&shared_config);
 
-    let msg = event.payload.records.get(0);
+    //TODO process every message despite lambda being configured to trigger each msg
+    let _msg = event.payload.records.get(0).expect("Message not present");
 
-    match msg {
-        None => { println!("Nothing in the received message!") }
-        Some(_msg) => {
-            let channel = _msg.message_attributes["Channel"].string_value.as_ref().unwrap();
-            let environment_id = _msg.message_attributes["EnvironmentId"].string_value.as_ref().unwrap();
+    let channel = _msg.message_attributes["Channel"].string_value.as_ref().expect("Channel name not present");
+    let environment_id = _msg.message_attributes["EnvironmentId"].string_value.as_ref().expect("Environment id not present");
 
-            println!("Env       req: {}", environment_id);
+    let url = format!("/telegram-ids/{environment_id}/token");
+    let token = get_parameter(&client, _msg, &url).await.unwrap();
 
-            let url = "/telegram-ids/".to_owned() + &environment_id + "/token";
-            let token = get_parameter(&client, _msg, &url).await.unwrap();
+    let url = format!("/telegram-ids/{environment_id}/{channel}");
+    let channel_id = get_parameter(&client, _msg, &url).await.unwrap();
 
-            let url = "/telegram-ids/".to_owned() + &environment_id + "/" + channel;
-            let channel_id = get_parameter(&client, _msg, &url).await.unwrap();
+    let mut map = HashMap::new();
+    map.insert("chat_id", channel_id.as_str());
+    let text = match &_msg.body {
+        None => { "" }
+        Some(txt) => { &txt }
+    };
+    map.insert("text", text);
 
-            println!("Channel id req: {}", channel_id);
+    let client = reqwest::Client::new();
+    let res = client.post(format!("https://api.telegram.org/bot{token}/sendMessage"))
+        .json(&map)
+        .send().await?;
 
-            let mut map = HashMap::new();
-            map.insert("chat_id", channel_id.as_str());
-            let text = match &_msg.body {
-                None => {""}
-                Some(txt) => {&txt}
-            };
-            map.insert("text", text);
-
-            let client = reqwest::Client::new();
-            let res = client.post(format!("https://api.telegram.org/bot{token}/sendMessage"))
-                .json(&map)
-                .send().await?;
-
-            println!("FINISHHHHHHHHHH {:?}", res);
-        }
-    }
+    println!("FINISHHHHHHHHHH {:?}", res);
 
     Ok(())
 }
