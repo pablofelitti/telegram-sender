@@ -40,48 +40,30 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     Ok(())
 }
 
-async fn get_parameter(client: &Client, msg: &SqsMessage, param_name: &str) -> Option<String> {
-    match msg.message_attributes.get("EnvironmentId") {
-        None => { panic!("No message attribute for the record") }
-        Some(e) => {
-            let params = load_all_params(client, e.string_value.clone().unwrap().as_str()).await;
-            println!("{} params have been found", params.len());
-            let opt = params.iter().find(|(x, _y)| x == param_name);
-            return if opt.is_some() {
-                println!("Found element");
-                let (_x, y) = opt?;
-                Some(y.to_string())
-            } else {
-                println!("Did not find any element");
-                None
-            };
-        }
-    }
+async fn get_parameter(client: &Client, msg: &SqsMessage, param_name: &str) -> Result<String, Box<dyn std::error::Error>> {
+    let env_attr = msg.message_attributes.get("EnvironmentId").expect("No message attribute for the record");
+    let env = env_attr.string_value.as_ref().expect("No environment value found");
+    let params = load_all_params(client, env).await;
+    let opt = params.iter().find(|(x, _y)| x == param_name);
+
+    let (_x, y) = opt.ok_or("No element found")?;
+
+    return Ok(y.to_owned());
 }
 
 async fn load_all_params(client: &Client, env: &str) -> Vec<(String, String)> {
-    let path = "/telegram-ids/".to_owned() + env;
-    println!("PATH: {}", path);
-    let resp = client.get_parameters_by_path().path(path).send().await.unwrap();
+    let path = format!("/telegram-ids/{env}");
+    let params_by_path = client.get_parameters_by_path().path(path).send().await.expect("Could not load parameters by path");
 
-    let mut name;
-    let mut value;
+    let mut params: Vec<(String, String)> = Vec::new();
 
-    let mut v: Vec<(String, String)> = Vec::new();
+    for param in params_by_path.parameters().expect("Could not retrieve parameters").iter() {
+        let name = param.name().expect("Could not load the name");
+        let value = param.value().expect("Could not load the value");
 
-    for param in resp.parameters().unwrap().iter() {
-        match param.name() {
-            None => { panic!() }
-            Some(_name) => name = _name
-        }
-        match param.value() {
-            None => { panic!() }
-            Some(_value) => value = _value
-        }
-
-        v.push((name.to_string(), value.to_string()));
+        params.push((name.to_owned(), value.to_owned()));
     }
-    return v;
+    return params;
 }
 
 #[tokio::main]
