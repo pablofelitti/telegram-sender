@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use aws_lambda_events::sqs::{SqsEvent, SqsMessage};
+use aws_lambda_events::sqs::SqsEvent;
 use aws_sdk_ssm::Client;
 use aws_sdk_ssm::config::Region;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
@@ -14,13 +14,13 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Box<dyn st
     let _msg = event.payload.records.get(0).expect("Message not present");
 
     let channel = _msg.message_attributes["Channel"].string_value.as_ref().expect("Channel name not present");
-    let environment_id = _msg.message_attributes["EnvironmentId"].string_value.as_ref().expect("Environment id not present");
+    let environment = _msg.message_attributes["EnvironmentId"].string_value.as_ref().expect("Environment id not present");
 
-    let url = format!("/telegram-ids/{environment_id}/token");
-    let token = get_parameter(&client, _msg, &url).await.expect("Token not found");
+    let url = format!("/telegram-ids/{environment}/token");
+    let token = get_parameter(&client, environment, &url).await.expect("Token not found");
 
-    let url = format!("/telegram-ids/{environment_id}/{channel}");
-    let channel_id = get_parameter(&client, _msg, &url).await.expect("Channel id not found");
+    let url = format!("/telegram-ids/{environment}/{channel}");
+    let channel_id = get_parameter(&client, environment, &url).await.expect("Channel id not found");
 
     let mut map = HashMap::new();
     map.insert("chat_id", channel_id.as_str());
@@ -34,11 +34,9 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Box<dyn st
     Ok(())
 }
 
-async fn get_parameter(client: &Client, msg: &SqsMessage, param_name: &str) -> Result<String, Box<dyn std::error::Error>> {
-    let env_attr = msg.message_attributes.get("EnvironmentId").expect("No message attribute for the record");
-    let env = env_attr.string_value.as_ref().expect("No environment value found");
+async fn get_parameter(client: &Client, env: &str, url: &str) -> Result<String, Box<dyn std::error::Error>> {
     let params = load_all_params(client, env).await;
-    let opt = params.iter().find(|(x, _y)| x == param_name);
+    let opt = params.iter().find(|(x, _y)| x == url);
 
     let (_x, y) = opt.ok_or("No element found")?;
 
