@@ -4,17 +4,17 @@ use aws_sdk_ssm::Client;
 use aws_sdk_ssm::config::Region;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 
-struct Props<'a> {
-    channel: &'a String,
-    environment: &'a String,
-    text: &'a String,
+struct Props {
+    channel: String,
+    environment: String,
+    text: String,
 }
 
-impl Props<'_> {
-    fn new(_msg: &SqsMessage) -> Props<'_> {
-        let channel = _msg.message_attributes["Channel"].string_value.as_ref().expect("Channel name not present");
-        let environment = _msg.message_attributes["EnvironmentId"].string_value.as_ref().expect("Environment id not present");
-        let text = _msg.body.as_ref().expect("Text expected in the message");
+impl Props {
+    fn new(_msg: &SqsMessage) -> Props {
+        let channel = _msg.message_attributes["Channel"].string_value.clone().expect("Channel name not present");
+        let environment = _msg.message_attributes["EnvironmentId"].string_value.clone().expect("Environment id not present");
+        let text = _msg.body.clone().expect("Text expected in the message");
         Props {
             channel,
             environment,
@@ -35,10 +35,10 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Box<dyn st
     let props = Props::new(_msg);
 
     let url = format!("/telegram-ids/{0}/token", props.environment);
-    let token = get_parameter(&client, props.environment, &url).await.expect("Token not found");
+    let token = get_parameter(&client, &props.environment, &url).await.expect("Token not found");
 
     let url = format!("/telegram-ids/{0}/{1}", props.environment, props.channel);
-    let channel_id = get_parameter(&client, props.environment, &url).await.expect("Channel id not found");
+    let channel_id = get_parameter(&client, &props.environment, &url).await.expect("Channel id not found");
 
     let mut map = HashMap::new();
     map.insert("chat_id", channel_id.as_str());
